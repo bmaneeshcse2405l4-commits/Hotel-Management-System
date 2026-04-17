@@ -1,0 +1,50 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+
+#define MAX_TEXT 512
+
+struct my_msg {
+    long int msg_type;
+    char some_text[MAX_TEXT];
+};
+
+int main()
+{
+    int running = 1;
+    int msgid;
+    struct my_msg some_data;
+    char buffer[100];
+
+    msgid = msgget((key_t)12345, 0666 | IPC_CREAT);
+
+    if (msgid == -1) {
+        perror("msgget failed");
+        exit(1);
+    }
+
+    while (running) {
+        printf("Enter text: ");
+        fgets(buffer, sizeof(buffer), stdin);
+
+        some_data.msg_type = 1;
+
+        // Safe copy
+        strncpy(some_data.some_text, buffer, MAX_TEXT);
+
+        if (msgsnd(msgid, (void *)&some_data,
+                   sizeof(some_data.some_text), 0) == -1) {
+            perror("msgsnd failed");
+        }
+
+        if (strncmp(buffer, "end", 3) == 0) {
+            running = 0;
+        }
+    }
+
+    return 0;
+}
