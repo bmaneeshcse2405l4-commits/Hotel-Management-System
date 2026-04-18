@@ -4,7 +4,6 @@ flask-socketio
 bcrypt
 psycopg[binary]
 gunicorn
-eventlet
 python-dotenv
 sqlalchemy
 pymysql

@@ -21,10 +21,13 @@ app = Flask(__name__)
 # ------------------------------------------------------------------
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'super-secret-hotel-key-dev')
 
-# Render provides postgres:// URLs; SQLAlchemy requires postgresql://
+# Render provides postgres:// URLs; SQLAlchemy requires postgresql+psycopg://
+# We use psycopg3 (psycopg[binary]) — must specify +psycopg dialect explicitly
 _db_url = os.environ.get('DATABASE_URL', 'sqlite:///hotel.db')
 if _db_url.startswith('postgres://'):
-    _db_url = _db_url.replace('postgres://', 'postgresql://', 1)
+    _db_url = _db_url.replace('postgres://', 'postgresql+psycopg://', 1)
+elif _db_url.startswith('postgresql://'):
+    _db_url = _db_url.replace('postgresql://', 'postgresql+psycopg://', 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = _db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
